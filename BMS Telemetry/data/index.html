@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html>
+  <link rel="icon" type="image/svg+xml" href="favicon.svg" />
+  <link rel="stylesheet" type="text/css" href="battery.css" />
+  <head>
+    <script type="text/javascript">
+      const ws = new WebSocket("ws://192.168.4.1/ws");
+
+      ws.onopen = function () {
+        alert("Connection opened");
+      };
+
+      ws.onclose = function () {
+        alert("Connection closed");
+      };
+
+      const num_segments = 7;
+      const num_cells_per_segment = 20;
+      const num_thermistors_per_segment = 16;
+
+      ws.onmessage = function (event) {
+        let data = JSON.parse(event.data);
+        let max_v = 0;
+        let min_v = 5;
+        let max_t = -40;
+        let min_t = 70;
+        let total_v = 0;
+        let total_t = 0;
+        for (let i = 0; i < num_cells_per_segment * num_segments; i++) {
+          total_v += data.voltages[i];
+          max_v = Math.max(max_v, data.voltages[i]);
+          min_v = Math.min(min_v, data.voltages[i]);
+          if (i < num_thermistors_per_segment * num_segments) {
+            total_t += data.temperatures[i];
+            max_t = Math.max(max_t, data.temperatures[i]);
+            min_t = Math.min(min_t, data.temperatures[i]);
+          }
+          let cell = document.getElementById("cell" + i);
+          cell.setAttribute("voltage", data.voltages[i]);
+          cell.setAttribute(
+            "temperature",
+            data.temperatures[
+              Math.round(
+                (i * num_thermistors_per_segment * num_segments) /
+                  (num_cells_per_segment * num_segments)
+              )
+            ]
+          );
+          cell.setAttribute(
+            "title",
+            "Cell " +
+              i +
+              "\n" +
+              "V: " +
+              data.voltages[i] +
+              "V\nT: " +
+              data.temperatures[
+                Math.round(
+                  (i * num_thermistors_per_segment * num_segments) /
+                    (num_cells_per_segment * num_segments)
+                )
+              ] +
+              "C"
+          );
+          let cellfill = document.getElementById("cell-fill" + i);
+          let height = data.voltages[i] - 1;
+          let color = getHue(
+            data.temperatures[
+              Math.round(
+                (i * num_thermistors_per_segment * num_segments) /
+                  (num_cells_per_segment * num_segments)
+              )
+            ]
+          );
+          cellfill.style.height = height + "em";
+          cellfill.style.backgroundColor =
+            "hsl(" + [color, "100%", "50%"] + ")";
+        }
+        let summary = document.getElementById("summary");
+        summary.innerHTML =
+          "Summary:<br />State: " +
+          data["state"] +
+          "<br />Total voltage: " +
+          total_v.toFixed(2) +
+          "v<br />Current: " +
+          data["current"].toFixed(2) +
+          "A<br />Wattage: " +
+          (data["current"] * total_v).toFixed(2) +
+          "W<br />Average temperature: " +
+          (total_t / (num_thermistors_per_segment * num_segments)).toFixed(2) +
+          "C<br />Max voltage: " +
+          max_v.toFixed(2) +
+          "v<br />Min voltage: " +
+          min_v.toFixed(2) +
+          "v<br />Max temperature: " +
+          max_t.toFixed(2) +
+          "C<br />Min temperature: " +
+          min_t.toFixed(2) +
+          "C";
+      };
+
+      function getHue(temperature) {
+        var maxHsl = 380;
+        var minHsl = 170;
+        var rngHsl = maxHsl - minHsl;
+
+        var maxTemp = 60;
+        var minTemp = -20;
+        var rngTemp = maxTemp - minTemp;
+        var degCnt = maxTemp - temperature;
+        var hslsDeg = rngHsl / rngTemp;
+        return 360 - (degCnt * hslsDeg - (maxHsl - 360));
+      }
+
+      window.addEventListener("load", onLoad);
+
+      function onLoad(event) {
+        document.getElementById("estop").addEventListener("click", () => {
+          ws.send(JSON.stringify({ action: "estop" }));
+        });
+
+        document.getElementById("enable").addEventListener("click", () => {
+          ws.send(JSON.stringify({ action: "enable" }));
+        });
+        createSegments();
+      }
+
+      function createSegments() {
+        let battery = document.createElement("div");
+        battery.className = "battery";
+        document.body.appendChild(battery);
+        for (let segment_num = 0; segment_num < num_segments; segment_num++) {
+          let segment = document.createElement("div");
+          segment.className = "segment";
+          segment.id = "segment" + segment_num;
+          battery.appendChild(segment);
+          for (let cell_num = 0; cell_num < num_cells_per_segment; cell_num++) {
+            let cell = document.createElement("div");
+            cell.className = "cell";
+            let absolute_cell_num =
+              cell_num + segment_num * num_cells_per_segment;
+            cell.id = "cell" + absolute_cell_num;
+            let fill = document.createElement("div");
+            fill.className = "cell-fill";
+            fill.id = "cell-fill" + absolute_cell_num;
+            cell.appendChild(fill);
+            cell.setAttribute("voltage", 0);
+            cell.setAttribute("temperature", 0);
+            segment.appendChild(cell);
+          }
+        }
+        let summary = document.createElement("div");
+        summary.className = "summary";
+        summary.id = "summary";
+        summary.innerHTML =
+          "Summary:<br />State: shutdown<br />Total voltage: 0v<br />Current: 0A<br />Wattage: 0W<br />Average temperature: 0C<br />Max voltage: 0v<br />Min voltage: 0v<br />Max temperature: 0C<br />Min temperature: 0C";
+        battery.appendChild(summary);
+      }
+    </script>
+  </head>
+
+  <body>
+    <button id="estop">E-Stop</button>
+    <button id="enable">HV Enable (Danger!)</button>
+  </body>
+</html>
