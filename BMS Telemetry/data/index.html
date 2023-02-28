@@ -76,6 +76,21 @@
           cellfill.style.backgroundColor =
             "hsl(" + [color, "100%", "50%"] + ")";
         }
+        console.log(data);
+        var faultstring =
+          data["undervoltage"] == "true"
+            ? "Undervoltage<br />"
+            : "" + data["overvoltage"] == "true"
+            ? "Overvoltage<br />"
+            : "" + data["undertemperature"] == "true"
+            ? "Undertemperature<br />"
+            : "" + data["overtemperature"] == "true"
+            ? "Overtemperature<br />"
+            : "" + data["overcurrent"] == "true"
+            ? "Overcurrent<br />"
+            : "" + data["external_kill"] == "true"
+            ? "External_kill"
+            : "";
         let summary = document.getElementById("summary");
         summary.innerHTML =
           "Summary:<br />State: " +
@@ -96,7 +111,8 @@
           max_t.toFixed(2) +
           "C<br />Min temperature: " +
           min_t.toFixed(2) +
-          "C";
+          "C<br /><br />" +
+          faultstring;
       };
 
       function getHue(temperature) {

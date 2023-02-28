@@ -17,6 +17,12 @@ public:
         kFault = 4
     };
 
+    enum class BMSFault : bool
+    {
+        kNotFaulted = 0,
+        kFaulted = 1,
+    };
+
     void Shutdown()
     {
         current_state_ = BMSState::kShutdown;
@@ -58,6 +64,13 @@ public:
             break;
         }
     }
+
+    BMSFault GetUndervoltage() { return BMSFault::kNotFaulted; }
+    BMSFault GetOvervoltage() { return BMSFault::kNotFaulted; }
+    BMSFault GetUndertemperature() { return BMSFault::kFaulted; }
+    BMSFault GetOvertemperature() { return BMSFault::kNotFaulted; }
+    BMSFault GetOvercurrent() { return BMSFault::kNotFaulted; }
+    BMSFault GetExternal_kill() { return BMSFault::kNotFaulted; }
 
 private:
     ICAN &can_interface_;

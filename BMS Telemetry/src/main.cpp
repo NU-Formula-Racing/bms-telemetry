@@ -11,7 +11,6 @@
 const byte DNS_PORT = 53;
 const char *ssid = "FormulaBMS";
 const char *password = "formulabmspass";
-IPAddress apIP(192, 168, 4, 1);
 DNSServer dnsServer;
 
 AsyncWebServer server(80);
@@ -43,6 +42,12 @@ void notifyClients()
   static StaticJsonDocument<10000> doc;
   doc["state"] = bms.GetState();
   doc["current"] = bms.GetCurrent();
+  doc["undervoltage"] = static_cast<bool>(bms.GetUndervoltage());
+  doc["overvoltage"] = static_cast<bool>(bms.GetOvervoltage());
+  doc["undertemperature"] = static_cast<bool>(bms.GetUndertemperature());
+  doc["overtemperature"] = static_cast<bool>(bms.GetOvertemperature());
+  doc["overcurrent"] = static_cast<bool>(bms.GetOvercurrent());
+  doc["external_kill"] = static_cast<bool>(bms.GetExternal_kill());
   static JsonObject cell_voltages = doc.createNestedObject("voltages");
   static JsonObject cell_temperatures = doc.createNestedObject("temperatures");
   for (int i = 0; i < kNumSeries; i++)
@@ -139,7 +144,7 @@ void setup()
   initSPIFFS();
   initWebServer();
   initWebSocket();
-  dnsServer.start(DNS_PORT, "*", apIP);
+  dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
   timer_group.AddTimer(100, notifyClients);
   /* timer_group.AddTimer(10, []()
                        { can_interface.Tick(); }); */
@@ -147,6 +152,7 @@ void setup()
 
 void loop()
 {
-  ws.cleanupClients();
+  // ws.cleanupClients();
+  dnsServer.processNextRequest();
   timer_group.Tick(millis());
 }
