@@ -23,7 +23,7 @@ VirtualTimerGroup timer_group;
 
 ESPCAN can_interface{};
 
-BMS bms{can_interface};
+BMS bms{can_interface, timer_group};
 
 void onRootRequest(AsyncWebServerRequest *request)
 {
@@ -140,14 +140,15 @@ void setup()
 {
   Serial.begin(9600);
   WiFi.softAP(ssid, password);
+  can_interface.Initialize(ICAN::BaudRate::kBaud1M);
   delay(100);
   initSPIFFS();
   initWebServer();
   initWebSocket();
   dnsServer.start(DNS_PORT, "*", WiFi.softAPIP());
   timer_group.AddTimer(100, notifyClients);
-  /* timer_group.AddTimer(10, []()
-                       { can_interface.Tick(); }); */
+  timer_group.AddTimer(10, []()
+                       { can_interface.Tick(); });
 }
 
 void loop()

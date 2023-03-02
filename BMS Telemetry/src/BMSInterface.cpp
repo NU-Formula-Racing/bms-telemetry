@@ -2,7 +2,7 @@
 
 void BMS::CreateVerboseMessages()
 {
-    for (int i = 0; i < kNumVoltageMessages; i++)
+    for (uint16_t i = 0; i < kNumVoltageMessages; i++)
     {
         voltage_signals_[i * kSignalsPerMessage + 0] = new MakeUnsignedCANSignal(float, 0, 8, 0.012, 2);
         *(voltage_signals_[i * kSignalsPerMessage + 0]) = 0;
@@ -30,7 +30,7 @@ void BMS::CreateVerboseMessages()
         can_interface_.RegisterRXMessage(*(voltage_messages_[i]));
     }
 
-    for (int i = 0; i < kNumTemperatureMessages; i++)
+    for (uint16_t i = 0; i < kNumTemperatureMessages; i++)
     {
         temperature_signals_[i * kSignalsPerMessage + 0] = new MakeUnsignedCANSignal(float, 0, 8, 1, -40);
         *(temperature_signals_[i * kSignalsPerMessage + 0]) = -40;
