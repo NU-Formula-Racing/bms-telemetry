@@ -63,7 +63,8 @@
               "C"
           );
           let cellfill = document.getElementById("cell-fill" + i);
-          let height = data.voltages[i] - 1;
+          let height =
+            Math.min(Math.max(data.voltages[i] - 2, 0), 4.2) * (4 / 2.2); //clamp to min 0, max 2.2, scale to max size 4
           let color = getHue(
             data.temperatures[
               Math.round(
@@ -123,6 +124,7 @@
         var maxTemp = 60;
         var minTemp = -20;
         var rngTemp = maxTemp - minTemp;
+        temperature = Math.min(Math.max(temperature, minTemp), maxTemp); //clamp
         var degCnt = maxTemp - temperature;
         var hslsDeg = rngHsl / rngTemp;
         return 360 - (degCnt * hslsDeg - (maxHsl - 360));
