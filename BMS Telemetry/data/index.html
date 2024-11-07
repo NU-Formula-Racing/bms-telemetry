@@ -14,8 +14,8 @@
         alert("Connection closed");
       };
 
-      const num_segments = 7;
-      const num_cells_per_segment = 20;
+      const num_segments = 5;
+      const num_cells_per_segment = 29;
       const num_thermistors_per_segment = 16;
 
       ws.onmessage = function (event) {
@@ -64,7 +64,7 @@
           );
           let cellfill = document.getElementById("cell-fill" + i);
           let height =
-            Math.min(Math.max(data.voltages[i] - 2, 0), 4.2) * (4 / 2.2); //clamp to min 0, max 2.2, scale to max size 4
+            Math.min(Math.max(data.voltages[i] - 2, 0), 4.2) * (2.4 / 2.2); //clamp to min 0, max 2.2, scale to max size 2.4
           let color = getHue(
             data.temperatures[
               Math.round(
@@ -134,12 +134,22 @@
 
       function onLoad(event) {
         document.getElementById("estop").addEventListener("click", () => {
+          alert('EMERGENCY STOP!!');
           ws.send(JSON.stringify({ action: "estop" }));
         });
 
         document.getElementById("enable").addEventListener("click", () => {
           ws.send(JSON.stringify({ action: "enable" }));
         });
+
+        // Add event listener for keydown
+        document.addEventListener('keydown', function(event) {
+            // Check if the spacebar (keyCode 32 or 'Space') is pressed
+            if (event.code === 'Space') {
+                document.getElementById('estop').click(); // Trigger the button click
+            }
+        });
+
         createSegments();
       }
 
@@ -181,4 +191,6 @@
     <button id="estop">E-Stop</button>
     <button id="enable">HV Enable (Danger!)</button>
   </body>
+
 </html>
+
