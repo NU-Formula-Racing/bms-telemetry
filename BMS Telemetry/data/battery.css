@@ -16,6 +16,7 @@
   outline-width: 0.3em;
   position: relative;
   margin: 0.5em;
+  padding: 0.6em;
   grid-template-columns: repeat(5, 1fr);
   grid-template-rows: repeat(4, 1fr);
 }
@@ -28,11 +29,12 @@
   outline-width: 0.3em;
   position: relative;
   margin: 0.5em;
+  padding: 0.6em;
 }
 
 .cell {
-  width: 3em;
-  height: 4em;
+  width: 2.2em;
+  height: 2.4em;
   top: 0.3em;
   left: 0em;
   margin: 0.5em;
@@ -44,9 +46,9 @@
 }
 .cell:before {
   content: "";
-  width: 2em;
+  width: 1.5em;
   height: 0.5em;
-  left: 0.5em;
+  left: 0.35em;
   top: -0.5em;
   background: rgb(0, 0, 0);
   position: absolute;
@@ -54,9 +56,43 @@
 
 .cell-fill {
   content: attr(cell-voltage);
-  width: 3em;
-  height: 1em;
+  width: 2.2em;
+  height: 0em;
   bottom: 0em;
   background-color: aquamarine;
   position: absolute;
+}
+
+#estop {
+  position: absolute;
+  left: 60em;
+  top: 40em;
+  padding: 3em;
+  background-color: red;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.5em;
+}
+
+#enable {
+  position: absolute;
+  left: 72em;
+  top: 40em;
+  padding: 2em;
+  background-color: green;
+  cursor: pointer;
+  border: none;
+  border-radius: 0.5em;
+}
+
+#estop:hover{
+  opacity: 0.8;
+}
+
+#enable:hover{
+  opacity: 0.8;
+}
+
+button {
+  z-index: 10;
 }
